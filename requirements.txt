@@ -9,3 +9,5 @@ pytest
 aiosqlite
 pyzmq
 requests
+aiohttp
+python-dateutil
