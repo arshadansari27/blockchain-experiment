@@ -1,11 +1,16 @@
+from app.network.subscriber import start_subscriber
+from asyncio import Queue
+from app.network.publisher import start_publisher
+import asyncio
+from app.network import load_peers
 from app.network.peer_manager import PeerManager
 from typing import List
 from fastapi import APIRouter
-import requests
+from aiohttp import request
 
 
 router = APIRouter()
-
+publisher_queue = Queue(maxsize=100, loop=asyncio.get_event_loop())
 
 @router.post("/")
 async def update_admin():
@@ -15,16 +20,19 @@ async def update_admin():
 @router.post("/register/{addr}")
 async def register_peer(addr: str):
     from app import CONFIG
+    peer_manager = CONFIG.peer_manager
 
-    CONFIG.peer_manager.update_peers([addr])
-    await broadcast_peer()
+    peer_manager.update_peers([addr])
+    if len(peer_manager.subscribed_to_peers) < 2:
+        peer_manager.subscribed_to_peers = [addr]
+        print("Updated peer during registration")
     return {
         'message': 'Successfuly registered',
         'peers': CONFIG.peer_manager.peers
     }
 
 
-@router.post("/connections")
+@router.get("/connections")
 async def get_connections():
     from app import CONFIG
 
@@ -41,28 +49,5 @@ async def startup_event():
     peer_manager = CONFIG.peer_manager
     if init_peer:
         await load_peers(init_peer, peer_manager)
-
-
-async def load_peers(init_peer: str, peer_manager: PeerManager):
-    response = requests.post(
-        f'http://{init_peer}/admin/register/{peer_manager.self_peer}'
-    )
-    result = response.json()
-    peer_manager.update_peers(result['peers'])
-    connections = []
-    for peer in result['peers']:
-        response = requests.post(f'http://{peer}/admin/connections')
-        result = response.json()
-        for connected_peer in result['connections']:
-            connections.append(tuple([peer, connected_peer]))
-    peer_manager.update_connection(connections)
-    subscribe_to = peer_manager.choose_peers_to_connect()
-    await init_subscription(subscribe_to)
-
-
-async def init_subscription(subscribe_to: List[str]):
-    pass
-
-
-async def broadcast_peer():
-    pass
+    asyncio.get_event_loop().create_task(start_subscriber())
+    asyncio.get_event_loop().create_task(start_publisher())

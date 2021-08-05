@@ -1,11 +1,9 @@
 from typing import List
 from pydantic.main import BaseModel
 from fastapi import APIRouter, HTTPException
-import requests
 
 #from ..dependencies import get_token_header
 from app.core.blockchain import Blockchain
-from ..network import PEER_MANAGER
 
 
 class Data(BaseModel):

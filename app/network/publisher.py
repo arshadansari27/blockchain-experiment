@@ -6,18 +6,28 @@ from zmq.asyncio import Context
 from zmq.sugar.constants import LINGER
 
 
-async def start_publisher(self_peer, messages):
+async def start_publisher():
+    from app import CONFIG
+    from app.routers.chain import blockchain
+
     context = Context.instance()
     socket = context.socket(zmq.PUB)
-    conn_str = f"tcp://{self_peer}"
-    print(f"={conn_str}=")
-    socket.connect(conn_str)
+    host = CONFIG.host.replace(str(CONFIG.port), str(CONFIG.publish_port))
+    conn_str = f"tcp://{host}"
+    print(f"PUBLISHER ={conn_str}=")
+    socket.bind(conn_str)
     socket.setsockopt(LINGER, 1)
+    while True:
+        try:
+            all_peers = ','.join(CONFIG.peer_manager.peers)
+            message = f"peer {all_peers}"
+            await socket.send(f"{CONFIG.host} {message}".encode('utf8'))
 
-    for message in messages:
-        print("Sending", message)
-        await socket.send(f"{self_peer} {message}".encode('utf8'))
-        await asyncio.sleep(1)
+            size = len(blockchain.chain)
+            await socket.send(f"{CONFIG.host} chain {size}".encode('utf8'))
+
+        finally:
+            await asyncio.sleep(3)
 
 
 if __name__ == '__main__':

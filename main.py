@@ -4,16 +4,16 @@ import uvicorn
 
 
 
-from app import app, CONFIG
+from app import app, Config
 
-CONFIG.node_id = int(os.environ["NODE_ID"])
-CONFIG.init_peer = os.environ.get('INIT_PEER', '').strip()
-CONFIG.port = 5000 + CONFIG.node_id
-CONFIG.peer_manager = PeerManager(CONFIG.port)
+
+node_id = int(os.environ["NODE_ID"])
+init_peer = os.environ.get('INIT_PEER', '').strip()
+config = Config.create_instance(node_id, init_peer)
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host="0.0.0.0", port=CONFIG.port, log_level='debug')
+    uvicorn.run(app, host="0.0.0.0", port=config.port, log_level='debug')
 
 
 

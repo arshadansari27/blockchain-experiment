@@ -4,17 +4,19 @@ import random
 
 
 class PeerManager:
-    def __init__(self, port):
-        h_name = socket.gethostname()
-        self.self_peer = socket.gethostbyname(h_name) + ":" + str(port)
-        self.peers = []
+    def __init__(self, host: str):
+        self.self_peer = host
+        self.peers = [self.self_peer]
         self.subscribed_to_peers = []
         self.connected_pairs = []
 
     def update_peers(self, peers):
+        added = False
         for peer in peers:
             if peer not in self.peers:
                 self.peers.append(peer)
+                added = True
+        return added
 
     def update_connection(self, connected_pairs: List[Tuple[str, str]]):
         for pair in connected_pairs:
@@ -22,12 +24,11 @@ class PeerManager:
                 continue
             self.connected_pairs.append(pair)
     
-    def get_subcription_peers(self):
+    def set_subcription_peers(self):
         subscribe_to = choose_peers_to_connect(
             self.self_peer, self.peers, self.connected_pairs
         )
         self.subscribed_to_peers = subscribe_to
-        return subscribe_to
 
 
 def choose_peers_to_connect(
@@ -48,6 +49,8 @@ def choose_peers_to_connect(
         counter += 1
         if counter % 3 == 0:
             current_limit += 1
+        if current_limit > 3:
+            break
     return [
         u[1] for u in candidate_connections
         if u[0] == self_peer
