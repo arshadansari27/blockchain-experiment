@@ -1,0 +1,11 @@
+nose
+pylama
+black
+python-multipart
+fastapi[all]==0.68.0
+sqlalchemy==1.4.22
+databases
+pytest
+aiosqlite
+pyzmq
+requests
