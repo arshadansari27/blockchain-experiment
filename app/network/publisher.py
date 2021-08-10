@@ -19,18 +19,18 @@ async def start_publisher():
     socket.setsockopt(LINGER, 1)
     while True:
         try:
-            all_peers = ','.join(CONFIG.peer_manager.peers)
+            all_peers = ",".join(CONFIG.peer_manager.peers)
             message = f"peer {all_peers}"
-            await socket.send(f"{CONFIG.host} {message}".encode('utf8'))
+            await socket.send(f"{CONFIG.host} {message}".encode("utf8"))
 
             size = len(blockchain.chain)
-            await socket.send(f"{CONFIG.host} chain {size}".encode('utf8'))
+            await socket.send(f"{CONFIG.host} chain {size}".encode("utf8"))
 
         finally:
             await asyncio.sleep(3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     port = sys.argv[1]
     asyncio.get_event_loop().run_until_complete(
         asyncio.wait([start_publisher(f"127.0.0.1:{port}", range(100))])

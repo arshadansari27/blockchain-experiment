@@ -2,7 +2,7 @@ from typing import List
 from pydantic.main import BaseModel
 from fastapi import APIRouter, HTTPException
 
-#from ..dependencies import get_token_header
+# from ..dependencies import get_token_header
 from app.core.blockchain import Blockchain
 
 
@@ -42,15 +42,6 @@ async def get_block(hash: str):
 )
 async def mine_block(data: Data):
     if not data:
-        raise HTTPException(
-            status_code=403, detail="There is no data in body"
-        )
+        raise HTTPException(status_code=403, detail="There is no data in body")
     block = blockchain.add_block(data.transactions)
     return block
-
-
-
-
-
-        
-    

@@ -49,7 +49,7 @@ class Config:
         _config.publish_port = publish_port
         _config.peer_manager = PeerManager(host)
         _config.host = host
-        CONFIG = _config 
+        CONFIG = _config
         return CONFIG
 
 

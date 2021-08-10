@@ -1,16 +1,12 @@
 from app.network.subscriber import start_subscriber
-from asyncio import Queue
 from app.network.publisher import start_publisher
 import asyncio
 from app.network import load_peers
-from app.network.peer_manager import PeerManager
-from typing import List
 from fastapi import APIRouter
-from aiohttp import request
 
 
 router = APIRouter()
-publisher_queue = Queue(maxsize=100, loop=asyncio.get_event_loop())
+
 
 @router.post("/")
 async def update_admin():
@@ -20,6 +16,7 @@ async def update_admin():
 @router.post("/register/{addr}")
 async def register_peer(addr: str):
     from app import CONFIG
+
     peer_manager = CONFIG.peer_manager
 
     peer_manager.update_peers([addr])
@@ -27,8 +24,8 @@ async def register_peer(addr: str):
         peer_manager.subscribed_to_peers = [addr]
         print("Updated peer during registration")
     return {
-        'message': 'Successfuly registered',
-        'peers': CONFIG.peer_manager.peers
+        "message": "Successfuly registered",
+        "peers": CONFIG.peer_manager.peers,
     }
 
 
@@ -36,9 +33,7 @@ async def register_peer(addr: str):
 async def get_connections():
     from app import CONFIG
 
-    return {
-        'connections': CONFIG.peer_manager.connected_pairs
-    }
+    return {"connections": CONFIG.peer_manager.connected_pairs}
 
 
 @router.on_event("startup")

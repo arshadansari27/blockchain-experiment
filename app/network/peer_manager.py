@@ -23,7 +23,7 @@ class PeerManager:
             if pair in self.connected_pairs:
                 continue
             self.connected_pairs.append(pair)
-    
+
     def set_subcription_peers(self):
         subscribe_to = choose_peers_to_connect(
             self.self_peer, self.peers, self.connected_pairs
@@ -32,9 +32,7 @@ class PeerManager:
 
 
 def choose_peers_to_connect(
-    self_peer: str,
-    peers: List[str],
-    connected_pairs: List[Tuple[str, str]]
+    self_peer: str, peers: List[str], connected_pairs: List[Tuple[str, str]]
 ) -> List[Tuple[str, str]]:
     candidate_connections = [u for u in connected_pairs]
     current_limit = 3
@@ -51,15 +49,11 @@ def choose_peers_to_connect(
             current_limit += 1
         if current_limit > 3:
             break
-    return [
-        u[1] for u in candidate_connections
-        if u[0] == self_peer
-    ]
+    return [u[1] for u in candidate_connections if u[0] == self_peer]
 
 
 def is_good_connection(
-    peers: List[str],
-    connection_pairs: List[Tuple[str, str]]
+    peers: List[str], connection_pairs: List[Tuple[str, str]]
 ):
     graph = {u: [] for u in peers}
     for (v1, v2) in connection_pairs:

@@ -36,25 +36,27 @@ async def listen():
         for peer in peer_manager.subscribed_to_peers:
             if peer == peer_manager.self_peer:
                 continue
-            peer_host = peer.replace('500', '300') # TODO: Dirty hack for port change
+            peer_host = peer.replace(
+                "500", "300"
+            )  # TODO: Dirty hack for port change
             conn_str = f"tcp://{peer_host}"
             print(f"SUBSCRIBER ={conn_str}=")
-            topicfilter = peer.encode('utf8') # peer.encode('utf8')
+            topicfilter = peer.encode("utf8")  # peer.encode('utf8')
             socket.setsockopt(SUBSCRIBE, topicfilter)
             socket.connect(conn_str)
         while True:
             string = await socket.recv()
-            data = string.decode('utf8')
-            if 'peer' in data:
+            data = string.decode("utf8")
+            if "peer" in data:
                 updated_peer = await update_peers(data, peer_manager)
                 if updated_peer:
                     break
-            elif 'chain' in data:
+            elif "chain" in data:
                 await update_chain(data, blockchain)
             else:
-                print('\tDo nothing with it')
+                print("\tDo nothing with it")
             new_len = len(peer_manager.subscribed_to_peers)
-            if  new_len > curr_subscribe_len:
+            if new_len > curr_subscribe_len:
                 break
     except Exception as _:
         print(traceback.format_exc())
@@ -66,7 +68,7 @@ async def listen():
 
 async def update_peers(data: str, peer_manager: PeerManager):
     _data = data.split()
-    latest_peers = _data[2].strip().split(',')
+    latest_peers = _data[2].strip().split(",")
     if peer_manager.update_peers(latest_peers):
         print("\tUpdated peers to ", peer_manager.peers)
         print("\tMight wanna update the connection too?")
@@ -87,15 +89,10 @@ async def update_chain(data: str, blockchain: Blockchain):
 
 async def update_blockchain_from_host(host: str, blockchain: Blockchain):
     async with ClientSession(trust_env=True) as session:
-        async with session.get(
-            f'http://{host}/chain'
-        ) as response:
+        async with session.get(f"http://{host}/chain") as response:
             result = await response.json()
             chain = []
             for block in result:
-                block['timestamp'] = parser.parse(block['timestamp'])
+                block["timestamp"] = parser.parse(block["timestamp"])
                 chain.append(Block(**block))
             blockchain.replace_chain(chain)
-
-
-

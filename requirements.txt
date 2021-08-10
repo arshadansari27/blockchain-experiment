@@ -11,3 +11,5 @@ pyzmq
 requests
 aiohttp
 python-dateutil
+pycryptodome
+rsa
